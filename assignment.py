@@ -1,7 +1,4 @@
 from gurobipy import *
-import os
-import xlrd
-import numpy
 
 def solve(products, stations):
   # Model

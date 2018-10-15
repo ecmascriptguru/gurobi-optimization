@@ -1,1 +1,3 @@
 ENV = 'local'
+PRODUCT_COUNT = 8
+STATIOIN_COUNT = 8
