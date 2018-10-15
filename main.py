@@ -1,10 +1,17 @@
-from gurobipy import *
+# from gurobipy import *
 import os
 import xlrd
 import numpy
 
+from settings import  ENV
 # Read data
-usecase = xlrd.open_workbook(os.path.join(r'C:\Users\TimKo\Desktop\Uni_7.0\4_WZL\MA\Use_Case', 'use-case_kaiquan_stator-assy.xlsx'))
+
+use_case_file_path = os.path.join(r'C:\Users\TimKo\Desktop\Uni_7.0\4_WZL\MA\Use_Case', 'use-case_kaiquan_stator-assy.xlsx')
+
+if ENV == 'local':
+    use_case_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'settings.xlsx')
+
+usecase = xlrd.open_workbook(use_case_file_path)
 
 # Sort data for products
 sheet_1 = usecase.sheet_by_name(r'product_1')
