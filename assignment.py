@@ -4,102 +4,24 @@ def solve(products, stations):
   # Model
   model = Model("Assignment")
   
-  # Stations
-  station_IDs = []
-  no_s = []
-  no_stations = []
-  capabilities = []
-  processing_times = []
+  
+  station_IDs = list()
+  processing_times = list()
   durations = dict()
   d_ips = dict()
-  task_types_s1 = []
-  task_types_s2 = []
-  task_types_s3 = []
-  task_types_s4 = []
-  task_types_s5 = []
-  task_types_s6 = []
-  task_types_s7 = []
-  task_types_s8 = []
-  processing_times_1 = []
-  processing_times_2 = []
-  processing_times_3 = []
-  processing_times_4 = []
-  processing_times_5 = []
-  processing_times_6 = []
-  processing_times_7 = []
-  processing_times_8 = []
-  station_IDs_s1 = [stations[0][0]]
-  station_IDs_s2 = [stations[1][0]]
-  station_IDs_s3 = [stations[2][0]]
-  station_IDs_s4 = [stations[3][0]]
-  station_IDs_s5 = [stations[4][0]]
-  station_IDs_s6 = [stations[5][0]]
-  station_IDs_s7 = [stations[6][0]]
-  station_IDs_s8 = [stations[7][0]]
-  task_types_s1 = [stations[0][2]]
-  task_types_s2 = [stations[1][2]]
-  task_types_s3 = [stations[2][2]]
-  task_types_s4 = [stations[3][2]]
-  task_types_s5 = [stations[4][2]]
-  task_types_s6 = [stations[5][2]]
-  task_types_s7 = [stations[6][2]]
-  task_types_s8 = [stations[7][2]]
-  processing_times_1 = [stations[0][3]]
-  processing_times_2 = [stations[1][3]]
-  processing_times_3 = [stations[2][3]]
-  processing_times_4 = [stations[3][3]]
-  processing_times_5 = [stations[4][3]]
-  processing_times_6 = [stations[5][3]]
-  processing_times_7 = [stations[6][3]]
-  processing_times_8 = [stations[7][3]]
-  IDs_s = station_IDs_s1+station_IDs_s2+station_IDs_s3+station_IDs_s4+station_IDs_s5+station_IDs_s6+station_IDs_s7+station_IDs_s8
-  capabilities = task_types_s1+task_types_s2+task_types_s3+task_types_s4+task_types_s5+task_types_s6+task_types_s7+task_types_s8
-  times = processing_times_1+processing_times_2+processing_times_3+processing_times_4+processing_times_5+processing_times_6+processing_times_7+processing_times_8
+  
+  capabilities = [s[2] for s in stations]
+  times = [s[3] for s in stations]
   
   # Products
   task_types_p = []
   task_types_float = []
   task_types = []
   product_IDs = []
-  no_p = []
-  no_products = []
-  task_types_p1 = []
-  task_types_p2 = []
-  task_types_p3 = []
-  task_types_p4 = []
-  task_types_p5 = []
-  task_types_p6 = []
-  task_types_p7 = []
-  task_types_p8 = []
-  product_IDs_p1 = [products[0][0]]
-  product_IDs_p2 = [products[1][0]]
-  product_IDs_p3 = [products[2][0]]
-  product_IDs_p4 = [products[3][0]]
-  product_IDs_p5 = [products[4][0]]
-  product_IDs_p6 = [products[5][0]]
-  product_IDs_p7 = [products[6][0]]
-  product_IDs_p8 = [products[7][0]]
-  task_types_p1 = [products[0][2]]
-  task_types_p2 = [products[1][2]]
-  task_types_p3 = [products[2][2]]
-  task_types_p4 = [products[3][2]]
-  task_types_p5 = [products[4][2]]
-  task_types_p6 = [products[5][2]]
-  task_types_p7 = [products[6][2]]
-  task_types_p8 = [products[7][2]]
-  IDs_p = product_IDs_p1+product_IDs_p2+product_IDs_p3+product_IDs_p4+product_IDs_p5+product_IDs_p6+product_IDs_p7+product_IDs_p8
-  task_types_p_float = task_types_p1+task_types_p2+task_types_p3+task_types_p4+task_types_p5+task_types_p6+task_types_p7+task_types_p8
-  #task_types = [task_types_1 task_types_2 task_types_3 task_types_4 task_types_5 task_types_6 task_types_7 task_types_8]
-  
-  
-  # Sorting parameters
-  for i in range(len(IDs_s)):
-      no_s.append(IDs_s[i][0])
-  no_stations = [int(x) for x in no_s] 
-    
-  for i in range(len(IDs_p)):
-      no_p.append(IDs_p[i][0])
-  no_products = [int(x) for x in no_p] 
+
+  task_types_p_float = [p[2] for p in products]
+  no_stations = [int(s[0][0]) for s in stations]
+  no_products = [int(p[0][0]) for p in products]
 
   for p in range(len(no_products)):
       c = [int(x) for x in task_types_p_float[p]]
@@ -162,4 +84,3 @@ def solve(products, stations):
      
   # Return relevant parameters
   return assignments
-
