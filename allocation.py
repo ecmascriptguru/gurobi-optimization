@@ -181,46 +181,85 @@ def solve(products,stations,positions,dist,a_ips):
           
   # Different jobs (tasks of different products) are not assigned to the same position if they are assigned to different stations
   for s in no_stations:
-      for p in no_products:
-          for q in no_products:
-              if q != p:
-                  for i in task_types_p[p-1]:
-                      for j in task_types_p[q-1]:
-                          if a.get((i,p,s),0)+a.get((j,q,s),0)==1:
-                              model.addConstr(y.get((i,p,f),0)+y.get((j,q,f),0) <= 1) 
+#      for u in no_stations:
+#          if u!= s:
+              for p in no_products:
+                  for q in no_products:
+                      if q != p:
+                          for i in task_types_p[p-1]:
+                              for j in task_types_p[q-1]:
+                                  if a.get((i,p,s),0)+a.get((j,q,s),0)==1:
+                                      for f in positions:
+                                          model.addConstr(y[i,p,f]+y[j,q,f] <= 1) 
 
   # Move if the job is allocated, but only if two different jobs are assigned to different positions 
-  for s in no_stations:
-      for p in no_products:
-          for i in task_types_p[p-1]:
-              if a.get((i,p,s),0)==1:
-                  for f in positions:
-                      for g in positions:
-                          for h in positions:
-                              if h!=g!=f:
-                                  model.addConstr(z_p[p,f,g]+z_s[s,h,g] >= 2*y.get((p,i,g),0))
+  #for s in no_stations:
+  #    for p in no_products:
+  #        for i in task_types_p[p-1]:
+  #            if a.get((i,p,s),0)==1:
+  #                for f in positions:
+  #                    for g in positions:
+  #                        for h in positions:
+  #                            if h!=g!=f:
+  #                               model.addConstr(z_p[p,f,g]+z_s[s,h,g] >= 2*y.get((i,p,g),0))
+  #                               model.addConstr(z_s[s,f,g]+z_p[p,f,g] <= y.get((p,i,g),0))
   
   for p in no_products:
       for i in task_types_p[p-1]:
-          for j in task_types_p[p-1]:
-              if i == j-1:
+ #         for j in task_types_p[p-1]:
+ #             if i == j-1:
                  for f in positions:
                      for g in positions:
                           if g != f:
-                              model.addConstr(y.get((p,i,f),0)+y.get((p,j,g),0) <= 2*z_p[p,f,g])
+                              model.addConstr((y.get((i-1,p,f),0)+y.get((i,p,g),0))-1 <= z_p[p,f,g])
+                              
    
-  #for s in no_stations:                             
-  #    for p in no_products:
-  #        for q in no_products:
-  #            if q!= p:
-  #                for i in task_types_p[p-1]:
-  #                    for j in task_types_p[q-1]:
-  #                        if a.get((i,p,s),0)==1 and a.get((q,j,s),0)==1:
-  #                            for f in positions:
-  #                                for g in positions:
-  #                                    if g!=f:
-  #                                        model.addConstr(y.get((p,i,f),0)+y.get((q,j,g),0) <= 2*z_s[s,f,g])
+  for s in no_stations:                             
+      for p in no_products:
+          for q in no_products:
+              if q!= p:
+                  for i in task_types_p[p-1]:
+                      for j in task_types_p[q-1]:
+                          if a.get((i,p,s),0)==1 and a.get((q,j,s),0)==1:
+                              for f in positions:
+                                  for g in positions:
+                                      if g!=f:
+                                          model.addConstr((y.get((i,p,f),0)+y.get((j,q,g),0))-1 <= z_s[s,f,g])
   
+  #for p in no_products:
+  #    for i in task_types_p[p-1]:
+  #        for f in positions:
+ #             for g in positions:
+  #                for h in positions:
+  #                    model.addConstr(2*y.get((i,p,g),0) <= z_p[p,f,g]+z_p[p,g,h])
+
+ # for p in no_products:
+ #     for s in no_stations:
+ #         for i in task_types_p[p-1]:
+ #             for f in positions:
+ #                 model.addConstr(z_p[p,f,f] + z_s[s,f,f] <= 2*y.get((i,p,f),0))  
+              
+  #for s in no_stations:
+  #    for i in task_types_p[p-1]:
+  #        for f in positions:
+  #            model.addConstr(z_s[s,f,f] <= y.get((i,p,f),0))
+
+    
+  #for p in no_products:
+  #    for f in positions:
+  #        for g in positions:
+  #            for h in positions:
+  #                if h!=g!=f:
+  #                    model.addConstr(z_p[p,g,h] <= z_p[p,f,g])
+                      
+  #for s in no_stations:
+  #    for f in positions:
+  #        for g in positions:
+  #            for h in positions:
+  #                if h!=g!=f:
+  #                    model.addConstr(z_s[s,g,h] <= z_s[s,f,g])
+    
+    
   # Variable zp and zs need to be zero when object is not moved 
   #for p in no_products:
   #    for f in positions:
@@ -234,13 +273,13 @@ def solve(products,stations,positions,dist,a_ips):
    #           if g == f:
    #               model.addConstr(z_s[s,f,g] == 0)
   
-  for p in no_products:
-    for f in positions:
-        model.addConstr(z_p[p,f,f] == 0)
-        
-  for s in no_stations:
-    for f in positions:
-        model.addConstr(z_s[s,f,f] == 0)
+  #for p in no_products:
+  #  for f in positions:
+  #      model.addConstr(z_p[p,f,f] == 0)
+       
+  #for s in no_stations:
+  #  for f in positions:
+  #     model.addConstr(z_s[s,f,f] == 0)
                       
                       
   # Every product leaves the origin and approaches the exit
