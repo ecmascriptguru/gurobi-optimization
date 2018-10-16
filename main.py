@@ -115,6 +115,7 @@ for i in positions:
     for j in positions:
         dist[i,j] = shop_floor.GetDistance(i,j)
 
+
 # Step into allocation function
 import allocation
 allocation_params = allocation.solve(products,stations,positions,dist,a_ips)
