@@ -1,9 +1,6 @@
 from gurobipy import *
-import os
-import xlrd
-import numpy
 
-def solve(products,stations,positions,dist,a_ips):
+def solve(products, stations, positions, dist, a_ips):
   # Model
   model = Model("Allocation")
   
