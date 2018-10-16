@@ -4,6 +4,7 @@ import xlrd
 import numpy
 
 from settings import  *
+from common import SampleData
 
 # Read data
 
@@ -63,16 +64,13 @@ for i in range(STATIOIN_COUNT):
         station.append(station_property)
     
     stations.append(station)
-    
+
+data = SampleData(products, stations)
+
 
 # Step into assignment function
 import assignment
 a_ips = assignment.solve(products,stations)
-
-
-
-
-
 
 # Sort assignments for handover
 indices_string = a_ips[0]
