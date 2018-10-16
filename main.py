@@ -1,4 +1,4 @@
-# from gurobipy import *
+from gurobipy import *
 import os
 import xlrd
 import numpy
@@ -32,7 +32,7 @@ for i in range(PRODUCT_COUNT):
         column = sheet.col(col_index)
         product_property = list()
         for row_index in range(len(column) - 1):
-            product_property.append(column[row_index + 1])
+            product_property.append(column[row_index + 1].value)
         
         product.append(product_property)
     
@@ -57,7 +57,7 @@ for i in range(STATIOIN_COUNT):
         column = sheet.col(col_index)
         station_property = list()
         for row_index in range(len(column) - 1):
-            station_property.append(column[row_index + 1])
+            station_property.append(column[row_index + 1].value)
         
         station.append(station_property)
     
