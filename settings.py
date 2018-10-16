@@ -1,6 +1,6 @@
 ENV = 'local'
-SAMPLE_FILE_NAME='settings.xml'
-PRODUCT_COUNT = 4
+SAMPLE_FILE_NAME='settings.xlsx'
+PRODUCT_COUNT = 8
 STATIOIN_COUNT = 8
 
 shopWidth = 9
