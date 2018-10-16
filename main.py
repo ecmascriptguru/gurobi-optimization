@@ -3,13 +3,14 @@ import os
 import xlrd
 import numpy
 
-from settings import  ENV, PRODUCT_COUNT, STATIOIN_COUNT
+from settings import  *
+
 # Read data
 
 use_case_file_path = os.path.join(r'C:\Users\TimKo\Desktop\Uni_7.0\4_WZL\MA\Use_Case', 'use-case_kaiquan_stator-assy.xlsx')
 
 if ENV == 'local':
-    use_case_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'settings.xlsx')
+    use_case_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), SAMPLE_FILE_NAME)
 
 usecase = xlrd.open_workbook(use_case_file_path)
 
