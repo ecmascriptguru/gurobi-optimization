@@ -3,15 +3,13 @@ import os
 import xlrd
 import numpy
 
-from settings import  *
-from common import SampleData
+from settings import  ENV, PRODUCT_COUNT, STATION_COUNT, SHOPWIDTH, SHOPDEPTH, RESX, RESY
 
 # Read data
-
 use_case_file_path = os.path.join(r'C:\Users\TimKo\Desktop\Uni_7.0\4_WZL\MA\Use_Case', 'use-case_kaiquan_stator-assy.xlsx')
 
 if ENV == 'local':
-    use_case_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), SAMPLE_FILE_NAME)
+    use_case_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'settings.xlsx')
 
 usecase = xlrd.open_workbook(use_case_file_path)
 
@@ -43,7 +41,7 @@ for i in range(PRODUCT_COUNT):
 #  Reading Stations
 stations = list()
 
-for i in range(STATIOIN_COUNT):
+for i in range(STATION_COUNT):
     sheet = usecase.sheet_by_name("station_%s" % (i + 1))
     station = list()
 
@@ -64,13 +62,16 @@ for i in range(STATIOIN_COUNT):
         station.append(station_property)
     
     stations.append(station)
-
-data = SampleData(products, stations)
-
+    
 
 # Step into assignment function
 import assignment
 a_ips = assignment.solve(products,stations)
+
+
+
+
+
 
 # Sort assignments for handover
 indices_string = a_ips[0]
@@ -92,15 +93,10 @@ a_ips = [indices, a_ips_values]
 # Instantiate shop_floor
 from DistanceCalculation import DistanceCalculation
 
-shopWidth = 12
-shopDepth = 9
-cols = 4
-rows = 3
-
-shop_floor = DistanceCalculation(shopWidth,shopDepth,rows,cols)
+shop_floor = DistanceCalculation(SHOPWIDTH,SHOPDEPTH,RESY,RESX)
 
 # Instantiate positions
-zonesCount = rows * cols
+zonesCount = RESY * RESX
 positions = []
 
 for i in range(zonesCount):
@@ -112,7 +108,6 @@ dist = dict()
 for i in positions:
     for j in positions:
         dist[i,j] = shop_floor.GetDistance(i,j)
-
 
 # Step into allocation function
 import allocation
@@ -329,4 +324,3 @@ import scheduling
 scheduling.solve(products,stations,positions,dist,a_ips,z_pfg,z_sfg,y_ipf,h_ijp,D_p,M)
 
 
-pass

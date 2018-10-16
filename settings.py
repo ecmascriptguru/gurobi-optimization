@@ -1,9 +1,10 @@
+# Settings ReadingInput
 ENV = 'local'
-SAMPLE_FILE_NAME='settings.xlsx'
 PRODUCT_COUNT = 8
-STATIOIN_COUNT = 8
+STATION_COUNT = 8
 
-shopWidth = 9
-shopDepth = 6
-cols = 3
-rows = 2
+# Settings DistanceCalculation 
+SHOPWIDTH = 9
+SHOPDEPTH = 6
+RESX = 3
+RESY = 2
