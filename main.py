@@ -4,6 +4,7 @@ import xlrd
 import numpy
 
 from settings import  ENV, PRODUCT_COUNT, STATION_COUNT, SHOPWIDTH, SHOPDEPTH, RESX, RESY
+from common import SampleData
 
 # Read data
 use_case_file_path = os.path.join(r'C:\Users\TimKo\Desktop\Uni_7.0\4_WZL\MA\Use_Case', 'use-case_kaiquan_stator-assy.xlsx')
@@ -63,12 +64,12 @@ for i in range(STATION_COUNT):
     
     stations.append(station)
     
+data = SampleData(products, stations)
+
 
 # Step into assignment function
 import assignment
 a_ips = assignment.solve(products,stations)
-
-
 
 
 
