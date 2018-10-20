@@ -4,10 +4,9 @@ import xlrd
 import numpy
 
 from settings import  ENV, PRODUCT_COUNT, STATION_COUNT, SHOPWIDTH, SHOPDEPTH, RESX, RESY
-from common import SampleData
 
 # Read data
-use_case_file_path = os.path.join(r'C:\Users\TimKo\Desktop\Uni_7.0\4_WZL\MA\Use_Case', 'use-case_kaiquan_stator-assy.xlsx')
+use_case_file_path = os.path.join(r'C:\Users\TimKo\Desktop\Uni_7.0\4_WZL\MA\Use_Case', 'use-case_kaiquan_stator-assy_1.xlsx')
 
 if ENV == 'local':
     use_case_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'settings.xlsx')
@@ -64,12 +63,12 @@ for i in range(STATION_COUNT):
     
     stations.append(station)
     
-data = SampleData(products, stations)
-
 
 # Step into assignment function
 import assignment
 a_ips = assignment.solve(products,stations)
+
+
 
 
 
@@ -110,66 +109,22 @@ for i in positions:
     for j in positions:
         dist[i,j] = shop_floor.GetDistance(i,j)
 
-# Step into allocation function
-import allocation
-allocation_params = allocation.solve(products,stations,positions,dist,a_ips)
+# Create list of shop-floor instances r
+#shop_floors = [1,2,3,4,5,6]
+shop_floors = []        
+global_tasks = []
 
+tasks = [i[1] for i in products]
 
+for k in range(len(tasks)):
+    for l in range(len(tasks[k])):
+        global_tasks.append(tasks[k][l])
 
+instances = range(len(global_tasks))
 
-
-
-# Instantiate and sort allocation params for handover
-indices_string = allocation_params[0]
-zp_values_float = []
-zp_noVal = []
-zs_values_float = []
-zs_noVal = []
-y_values_float = []
-y_noVal = []
-
-
-
-for params in range(len(indices_string)):
-    string = indices_string[params]
-    index = string.split(",")
-    #number_string = [int(k) for k in index]
-    
-    if index[0] == 'z_p':
-        index1_zp = index[1]
-        index2_zp = index[2]
-        index3_zp = index[3]
-        z_pfg_index_string = [index1_zp,index2_zp,index3_zp]
-        z_pfg_index = [int(k) for k in z_pfg_index_string]
-        zp_noVal.append(z_pfg_index)
-        zp_values_float.append(allocation_params[1][params])
-    elif index[0] == 'z_s':
-        index1_zs = index[1]
-        index2_zs = index[2]
-        index3_zs = index[3]
-        z_sfg_index_string = [index1_zs,index2_zs,index3_zs]
-        z_sfg_index = [int(k) for k in z_sfg_index_string]
-        zs_noVal.append(z_sfg_index)
-        zs_values_float.append(allocation_params[1][params])
-    elif index[0] == 'y':
-        index1_y = index[1]
-        index2_y = index[2]
-        index3_y = index[3]
-        y_ipf_index_string = [index1_y,index2_y,index3_y]
-        y_ipf_index = [int(k) for k in y_ipf_index_string]
-        y_noVal.append(y_ipf_index)
-        y_values_float.append(allocation_params[1][params])
-    else:
-        Dmax = allocation_params[1][params]
-
-zp_values = [int(f) for f in zp_values_float]
-zs_values = [int(f) for f in zs_values_float]
-y_values = [int(f) for f in y_values_float]
-        
-z_pfg = [zp_noVal,zp_values]
-z_sfg = [zs_noVal,zs_values]
-y_ipf = [y_noVal,y_values]
-    
+for i in instances:
+    shop_floors.append(i+1)
+   
 
 # Include precedence parameter h_ijp - intree precedence graph
 # product variant 1 (product variant 10 poles)
@@ -294,21 +249,98 @@ h_p8[16,18,8] = 1
 
 # global intree dict
 h_ijp.update(h_p8)
+        
+
+# Step into allocation function
+import allocation
+allocation_params = allocation.solve(products,stations,positions,dist,a_ips,h_ijp,shop_floors)
+
+
+
+
+
+
+# Instantiate and sort allocation params for handover
+indices_string = allocation_params[0]
+zp_values_float = []
+zp_noVal = []
+zs_values_float = []
+zs_noVal = []
+y_values_float = []
+y_noVal = []
+
+
+
+for params in range(len(indices_string)):
+    string = indices_string[params]
+    index = string.split(",")
+    #number_string = [int(k) for k in index]
+    
+    if index[0] == 'z_p':
+        index1_zp = index[1]
+        index2_zp = index[2]
+        index3_zp = index[3]
+        index4_zp = index[4]
+        index5_zp = index[5]
+        z_pfg_index_string = [index1_zp,index2_zp,index3_zp,index4_zp,index5_zp]
+        z_pfg_index = [int(k) for k in z_pfg_index_string]
+        zp_noVal.append(z_pfg_index)
+        zp_values_float.append(allocation_params[1][params])
+    elif index[0] == 'z_s':
+        index1_zs = index[1]
+        index2_zs = index[2]
+        index3_zs = index[3]
+        index4_zs = index[4]
+        index5_zs = index[5]
+        z_sfg_index_string = [index1_zs,index2_zs,index3_zs,index4_zs,index5_zs]
+        z_sfg_index = [int(k) for k in z_sfg_index_string]
+        zs_noVal.append(z_sfg_index)
+        zs_values_float.append(allocation_params[1][params])
+    elif index[0] == 'y':
+        index1_y = index[1]
+        index2_y = index[2]
+        index3_y = index[3]
+        index4_y = index[4]
+        y_ipf_index_string = [index1_y,index2_y,index3_y,index4_y]
+        y_ipf_index = [int(k) for k in y_ipf_index_string]
+        y_noVal.append(y_ipf_index)
+        y_values_float.append(allocation_params[1][params])
+    else:
+        Dmax = allocation_params[1][params]
+
+zp_values = [int(f) for f in zp_values_float]
+zs_values = [int(f) for f in zs_values_float]
+y_values = [int(f) for f in y_values_float]
+        
+z_pfg = [zp_noVal,zp_values]
+z_sfg = [zs_noVal,zs_values]
+y_ipf = [y_noVal,y_values]
+
+# Check results
+y_indices = []
+
+for i in range(len(y_ipf[1])):
+    if y_ipf[1][i] == 1:
+        y_indices.append(y_ipf[0][i])
+        
+zp_indices = []
+
+for i in range(len(z_pfg[1])):
+    if z_pfg[1][i] == 1:
+        zp_indices.append(z_pfg[0][i])
+        
+zs_indices = []
+
+for i in range(len(z_sfg[1])):
+    if z_sfg[1][i] == 1:
+        zs_indices.append(z_sfg[0][i])
 
 
 # Include and sort products' due dates
-D_p_list = []
 D_p_float = []
-D_p = []
-due_date_p1 = [products[0][5]]
-due_date_p2 = [products[1][5]]
-due_date_p3 = [products[2][5]]
-due_date_p4 = [products[3][5]]
-due_date_p5 = [products[4][5]]
-due_date_p6 = [products[5][5]]
-due_date_p7 = [products[6][5]]
-due_date_p8 = [products[7][5]]
-D_p_list = due_date_p1+due_date_p2+due_date_p3+due_date_p4+due_date_p5+due_date_p6+due_date_p7+due_date_p8
+
+D_p_list = [i[5] for i in products]
+
 
 for i in range(len(D_p_list)):
     D_p_float.append(D_p_list[i][0])
