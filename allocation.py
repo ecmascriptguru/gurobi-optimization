@@ -1,6 +1,6 @@
 from gurobipy import *
 
-def solve(products,stations,positions,dist,a_ips,h_ijp,shop_floors):
+def solve(products, stations, positions, dist, a_ips, h_ijp, shop_floors):
     # Model
     model = Model("Allocation")
     

@@ -1,6 +1,20 @@
 """
-Main class to manage sample data
+Main classes to manage sample data
 """
+
+class Product(object):
+    id = None
+
+    def __init__(self, **kwargs):
+        pass
+
+
+class Station(object):
+    id = None
+
+    def __init__(self, **kwargs):
+        pass
+
 
 class SampleData(object):
     products = []
