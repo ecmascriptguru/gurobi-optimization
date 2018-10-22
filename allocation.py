@@ -4,6 +4,9 @@ def solve(products,stations,positions,dist,a_ips,h_ijp,shop_floors):
     # Model
     model = Model("Allocation")
     
+    # import relevant functions
+    import nge_fct
+    
     task_types_p = []
     product_IDs = []
 
@@ -47,19 +50,25 @@ def solve(products,stations,positions,dist,a_ips,h_ijp,shop_floors):
     z_p = {}
     for p in no_products:
         for r in shop_floors:
-            for f in positions:
-                for g in positions:
-                    # TODO: Adjust additional attributes (lb, ub, vtype, obj). Do NOT change the name!
-                    z_p[p,f,r,g,r+1] = model.addVar(obj = 0, vtype=GRB.BINARY, name = "z_p,%s,%s,%s,%s,%s" % (p,f,r,g,r+1))
+            for v in shop_floors:
+                if v > r:
+                    for f in positions:
+                        for g in positions:
+                            if g!= f:
+                                # TODO: Adjust additional attributes (lb, ub, vtype, obj). Do NOT change the name!
+                                z_p[p,f,r,g,v] = model.addVar(obj = 0, vtype=GRB.BINARY, name = "z_p,%s,%s,%s,%s,%s" % (p,f,r,g,r+1))
 
     # Binary decision variable z_sfg indicates whether product p is moved from postion f to g
     z_s = {}
     for s in no_stations:
         for r in shop_floors:
-            for f in positions:
-                for g in positions:
-                    # TODO: Adjust additional attributes (lb, ub, vtype, obj). Do NOT change the name!
-                    z_s[s,f,r,g,r+1] = model.addVar(obj = 0, vtype = GRB.BINARY, name = "z_s,%s,%s,%s,%s,%s" % (s,f,r,g,r+1))
+            for v in shop_floors:
+                if v > r:
+                    for f in positions:
+                        for g in positions:
+                            if g!=f:
+                                # TODO: Adjust additional attributes (lb, ub, vtype, obj). Do NOT change the name!
+                                z_s[s,f,r,g,v] = model.addVar(obj = 0, vtype = GRB.BINARY, name = "z_s,%s,%s,%s,%s,%s" % (s,f,r,g,r+1))
 
 
     # Binary decision variable y_i indicates whether student i is a leader (value = 1) or not (value = 0).
@@ -82,8 +91,8 @@ def solve(products,stations,positions,dist,a_ips,h_ijp,shop_floors):
 
     # Add constraints
     # Max travelled distance Dmax is not exceeded
-    model.addConstr(quicksum(dist[f,g]*c_p[p-1]*z_p[p,f,r,g,r+1] for p in no_products for r in shop_floors for f in positions for g in positions)+
-                    quicksum(dist[f,g]*c_s[s-1]*z_s[s,f,r,g,r+1] for s in no_stations for r in shop_floors for f in positions for g in positions) <= Dmax)
+    model.addConstr(quicksum(dist[f,g]*c_p[p-1]*z_p[p,f,r,g,v] for p in no_products for r in shop_floors for v in shop_floors if v>r for f in positions for g in positions if g!=f)+
+                    quicksum(dist[f,g]*c_s[s-1]*z_s[s,f,r,g,v] for s in no_stations for r in shop_floors for v in shop_floors if v>r for f in positions for g in positions if g!=f) <= Dmax)
     
     # Every job is assigned to exactly one position     
     for p in no_products:
@@ -112,13 +121,17 @@ def solve(products,stations,positions,dist,a_ips,h_ijp,shop_floors):
     # Product movement between steps  
     for p in no_products:
         for i in task_types_p[p-1]:
-          for j in task_types_p[p-1]:
- #             if i == j-1 and h_ijp.get((i,j,p),0)==1:
+           for j in task_types_p[p-1]:
+#             if i == j-1 and h_ijp.get((i,j,p),0)==1:
                   for r in shop_floors:
-                     for f in positions:
-                         for g in positions:
+#                      for v in range(r+1, len(shop_floors), 1):
+                         for f in positions:
+                             for g in positions:
                                 if g != f:
-                                    model.addConstr((y.get((i,p,f,r),0)+y.get((j,p,g,r+1),0))-1 <= z_p[p,f,r,g,r+1])
+                                    nge_list = nge_fct.nge_fct(shop_floors, r, y[i, p, f, r], y[j, p, g, v])
+                                    if nge_list[0] == True:
+                                        t = nge_list[1]
+                                        model.addConstr((y.get((i,p,f,r),0)+y.get((j,p,g,t),0))-1 <= z_p[p,f,r,g,t])
                                 
     # Station movement between steps 
     for s in no_stations:                             
@@ -129,10 +142,14 @@ def solve(products,stations,positions,dist,a_ips,h_ijp,shop_floors):
                         for j in task_types_p[q-1]:
 #                            if a.get((i,p,s),0)==1 and a.get((q,j,s),0)==1:
                                 for r in shop_floors:
-                                    for f in positions:
-                                        for g in positions:
-                                            if g!=f:
-                                                model.addConstr((y.get((i,p,f,r),0)+y.get((j,q,g,r+1),0))-1 <= z_s[s,f,r,g,r+1])
+#                                    for v in shop_floors:
+                                        for f in positions:
+                                            for g in positions:
+                                                if g!=f:
+                                                    nge_list = nge_fct(r,shop_floors,y[i,p,f,r],y[j,p,g,v])
+                                                    if nge_list[0] == True:
+                                                        t = nge_list[1]
+                                                        model.addConstr((y.get((i,p,f,r),0)+y.get((j,q,g,t),0))-1 <= z_s[s,f,r,g,t])
     
     
     # Update the model to make constraints known.

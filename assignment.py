@@ -10,6 +10,8 @@ def solve(products, stations):
   durations = dict()
   d_ips = dict()
   
+  # Sorting Parameters
+  # Stations
   capabilities = [s[2] for s in stations]
   times = [s[3] for s in stations]
   

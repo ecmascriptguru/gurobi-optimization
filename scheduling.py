@@ -5,11 +5,11 @@ import numpy
 
 
 
-def solve(products, stations, positions, dist, a_ips, z_pfg, z_sfg, y_ipf, h_ijp, D_p, M):        
+def solve(products,stations,positions,dist,a_ips,z_pfg,z_sfg,y_ipf,h_ijp,D_p,M):        
     # Model
     model = Model("Scheduling")
     
-    # stations
+       # stations
     station_IDs = []
     processing_times = []
     durations = dict()
@@ -37,24 +37,29 @@ def solve(products, stations, positions, dist, a_ips, z_pfg, z_sfg, y_ipf, h_ijp
     zp = dict()
     product_IDs_z = []
     positions_pf = []
+    shop_floor_rp = []
     positions_pg = []
+    shop_floor_rrp = []
     
     zs = dict()
     station_IDs_z = []
     positions_sf = []
+    shop_floor_rs = [] 
     positions_sg = []
+    shop_floor_rrs = [] 
     
     y = dict()
     task_types_y = []
     product_IDs_y = []
     positions_y = []
+    shop_floor_ry = []
     
     
     # Sorting parameters
     no_stations = [int(s[0][0]) for s in stations] 
     no_products = [int(p[0][0]) for p in products]
     v_p = [p[3][0] for p in products]
-
+    v_s = [s[4][0] for s in stations]
 
     for p in range(len(no_products)):
         c = [int(x) for x in task_types_p_float[p]]
@@ -92,31 +97,35 @@ def solve(products, stations, positions, dist, a_ips, z_pfg, z_sfg, y_ipf, h_ijp
     for k in range(len(task_types_a)):
         a[task_types_a[k],product_IDs_a[k],station_IDs_a[k]] = values[k]
         
-    # Sorting handover parameters zp[p,f,g]
+    # Sorting handover parameters zp[p,f,r,g,r+1]
     indices = z_pfg[0]
     values = z_pfg[1]
   
     for i in range(len(indices)):
         product_IDs_z.append(indices[i][0])
         positions_pf.append(indices[i][1])
-        positions_pg.append(indices[i][2])
+        shop_floor_rp.append(indices[i][2])
+        positions_pg.append(indices[i][3])
+        shop_floor_rrp.append(indices[i][4])
       
     for k in range(len(product_IDs_z)):
-        zp[product_IDs_z[k],positions_pf[k],positions_pg[k]] = values[k]
+        zp[product_IDs_z[k],positions_pf[k],shop_floor_rp[k],positions_pg[k],shop_floor_rrp[k]] = values[k]
     
-    # Sorting handover parameters zs[s,f,g]
+    # Sorting handover parameters zs[s,f,r,g,r+1]
     indices = z_sfg[0]
     values = z_sfg[1]
   
     for i in range(len(indices)):
         station_IDs_z.append(indices[i][0])
         positions_sf.append(indices[i][1])
-        positions_sg.append(indices[i][2])
+        shop_floor_rs.append(indices[i][2])
+        positions_sg.append(indices[i][3])
+        shop_floor_rrs.append(indices[i][4])
       
     for k in range(len(station_IDs_z)):
-        zs[station_IDs_z[k],positions_sf[k],positions_sg[k]] = values[k]
+        zs[station_IDs_z[k],positions_sf[k],shop_floor_rs[k],positions_sg[k],shop_floor_rrs[k]] = values[k]
     
-    # Sorting handover parameters y[i,p,f]
+    # Sorting handover parameters y[i,p,f,r]
     indices = y_ipf[0]
     values = y_ipf[1]
   
@@ -124,10 +133,22 @@ def solve(products, stations, positions, dist, a_ips, z_pfg, z_sfg, y_ipf, h_ijp
         task_types_y.append(indices[i][0])
         product_IDs_y.append(indices[i][1])
         positions_y.append(indices[i][2])
+        shop_floor_ry.append(indices[i][3])
       
     for k in range(len(task_types_y)):
-        y[task_types_y[k],product_IDs_y[k],positions_y[k]] = values[k]
+        y[task_types_y[k],product_IDs_y[k],positions_y[k],shop_floor_ry[k]] = values[k]
     
+    
+    myvartest = dict()
+#    temp_dict = dict()
+    
+#    k = range(len(y))
+    
+#    for k in range(len(y)):
+#        if y[task_types_y[k],product_IDs_y[k],positions_y[k],shop_floor_ry[k]] == 1:
+#           temp_dict = y[task_types_y[k],product_IDs_y[k],positions_y[k],shop_floor_ry[k]]            
+#             myvartest.update()
+
     
     # Add decision variables
     # Continuous decision variable Cmax, that is maximal completion time/makespan for all jobs, shall be minimized
@@ -174,41 +195,41 @@ def solve(products, stations, positions, dist, a_ips, z_pfg, z_sfg, y_ipf, h_ijp
      
         
     # Every job finishes/reaches exit earlier than Cmax
-    for s in no_stations:
-        for p in no_products:
-            for i in task_types_p[p-1]:
-                if a.get((i,p,s),0)==1:
-                    for f in positions:
-                        for g in positions:
-                            if g!=f:
-                                model.addConstr(t[i,p,s]+d_ips[i,p,s] <= Cmax)
+   # for s in no_stations:
+   #     for p in no_products:
+   #         for i in task_types_p[p-1]:
+   #             if a.get((i,p,s),0)==1:
+   #                 for f in positions:
+   #                     for g in positions:
+   #                         if g!=f:
+   #                             model.addConstr(t[i,p,s]+d_ips[i,p,s] <= Cmax)
 
 
     # Job jp can only start when job ip has been finished and jp is a successor of ip (in tree precedence constraint)
-    for s in no_stations:
-        for u in no_stations:
-            for p in no_products:
-                for i in task_types_p[p-1]:
-                    for j in task_types_p[p-1]:
-                       if h_ijp.get((i,j,p),0)==1 and a.get((i,p,s),0)==1 and a.get((j,p,u),0)==1:
-                            for f in positions:
-                                for g in positions:
-                                    if g!=f:
-                                        model.addConstr(t[i,p,s]+d_ips[i,p,s]-(dist[f,g]/(1/v_p[p-1]))*zp[p,f,g] <= t[j,p,u])
+   # for s in no_stations:
+   #     for u in no_stations:
+   #         for p in no_products:
+   #             for i in task_types_p[p-1]:
+   #                 for j in task_types_p[p-1]:
+   #                    if h_ijp.get((i,j,p),0)==1 and a.get((i,p,s),0)==1 and a.get((j,p,u),0)==1:
+   #                         for f in positions:
+   #                             for g in positions:
+   #                                 if g!=f:
+   #                                     model.addConstr(t[i,p,s]+d_ips[i,p,s]-(dist[f,g]/(1/v_p[p-1]))*zp[p,f,g]-(dist[f,g]/(1/v_s[s-1]) <= t[j,p,u]))
                         
 
     # Job jq can only be started when job ip has been completed
-    for s in no_stations:
-        for p in no_products:
-            for q in no_products:
-                if q!=p:
-                    for i in task_types_p[p-1]:
-                        for j in task_types_p[q-1]:
-                            if a.get((i,p,s),0)==1 and a.get((j,q,s),0)==1:
-                                for f in positions:
-                                    for g in positions:
-                                        if g!=f:
-                                            model.addConstr((t[i,p,s]+d_ips[i,p,s]-dist[f,g]/(1/v_p[q-1]))*zp[q,f,g] <= t[j,q,s])
+   # for s in no_stations:
+   #     for p in no_products:
+   #         for q in no_products:
+   #             if q!=p:
+   #                 for i in task_types_p[p-1]:
+   #                     for j in task_types_p[q-1]:
+   #                         if a.get((i,p,s),0)==1 and a.get((j,q,s),0)==1:
+   #                             for f in positions:
+   #                                 for g in positions:
+   #                                     if g!=f:
+   #                                         model.addConstr(t[i,p,s]+d_ips[i,p,s]-(dist[f,g]/(1/v_p[q-1]))*zp[q,f,g]-(dist[f,g]/(1/v_s[s-1]))*zs[s,f,g] <= t[j,q,s])
                 
     # Big M constraints
     #for s in no_stations:
@@ -221,8 +242,8 @@ def solve(products, stations, positions, dist, a_ips, z_pfg, z_sfg, y_ipf, h_ijp
     #                            for f in positions:
     #                                for g in positions:
     #                                    if g!=f:
-    #                                        model.addConstr((t[i,p,s]+d_ips[i,p,s]-dist[f,g]/(1/v_p[q-1]))*zp[q,f,g]*y.get((j-1,q,f),0) <= (t[j,q,s]+M*(1-x[i,j,p,q]))*y.get((j,q,g),0))    
-    #                                        model.addConstr((t[j,q,s]+d_ips[j,q,s]-dist[f,g]/(1/v_p[p-1]))*zp[p,f,g]*y.get((i-1,p,f),0) <= (t[i,p,s]+M*x[i,j,p,q])*y.get((i,p,g),0))
+    #                                        model.addConstr(t[i,p,s]+d_ips[i,p,s]-(dist[f,g]/(1/v_p[q-1]))*zp[q,f,g]-(dist[f,g]/(1/v_s[s-1]))*zs[s,f,g] <= t[j,q,s]+M*(1-x[i,j,p,q]))    
+    #                                        model.addConstr(t[j,q,s]+d_ips[j,q,s]-(dist[f,g]/(1/v_p[p-1]))*zp[p,f,g]-(dist[f,g]/(1/v_s[s-1]))*zs[s,f,g] <= t[i,p,s]+M*x[i,j,p,q])
                           
                                                                  
                                             
@@ -267,9 +288,9 @@ def solve(products, stations, positions, dist, a_ips, z_pfg, z_sfg, y_ipf, h_ijp
     myvars = model.getVars()
     myvars_list = [[],[]]
   
-    for v in myvars:
-        myvars_list[0].append(v.VarName)
-        myvars_list[1].append(v.X)
+   # for v in myvars:
+   #     myvars_list[0].append(v.VarName)
+   #    myvars_list[1].append(v.X)
 
     # Return relevant parameters
     return myvars_list

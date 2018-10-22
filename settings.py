@@ -1,6 +1,6 @@
 # Settings ReadingInput
 ENV = 'local'
-PRODUCT_COUNT = 8
+PRODUCT_COUNT = 4
 STATION_COUNT = 8
 
 # Settings DistanceCalculation 

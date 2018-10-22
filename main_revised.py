@@ -78,8 +78,10 @@ indices_string = a_ips[0]
 a_ips_values = []
 indices = []
 
-for number_string in indices_string:
-    number_string = [int(k) for k in number_string.split(",")]
+for ips in range(len(indices_string)):
+    number_string = indices_string[ips]
+    index = number_string.split(",")
+    number_string = [int(k) for k in index]
     indices.append(number_string)
 
 for f in a_ips[1]:
@@ -108,20 +110,20 @@ for i in positions:
         dist[i,j] = shop_floor.GetDistance(i,j)
 
 # Create list of shop-floor instances r
-#shop_floors = [1,2,3,4,5,6]
-shop_floors = []        
-global_tasks = []
+shop_floors = [1,2,3,4,5,6,7,8,9,10,11]
+#shop_floors = []        
+#global_tasks = []
 
-tasks = [i[1] for i in products]
+#tasks = [i[1] for i in products]
 
-for k in range(len(tasks)):
-    for l in range(len(tasks[k])):
-        global_tasks.append(tasks[k][l])
+#for k in range(len(tasks)):
+#    for l in range(len(tasks[k])):
+#        global_tasks.append(tasks[k][l])
 
-instances = range(len(global_tasks))
+#instances = range(len(global_tasks))
 
-for i in instances:
-    shop_floors.append(i+1)
+#for i in instances:
+#    shop_floors.append(i+1)
    
 
 # Include precedence parameter h_ijp - intree precedence graph
@@ -247,7 +249,6 @@ h_p8[16,18,8] = 1
 
 # global intree dict
 h_ijp.update(h_p8)
-        
 
 # Step into allocation function
 import allocation
