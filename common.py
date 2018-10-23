@@ -98,3 +98,6 @@ class SampleData(object):
     
     def get_station_ids(self):
         return [s.id for s in self.stations]
+    
+    def get_task_ids(self):
+        return [t.id for t in self.tasks]

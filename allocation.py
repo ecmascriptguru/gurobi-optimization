@@ -4,41 +4,34 @@ from nge_fct import nge_fct as get_next_greatest
 def solve(products, stations, positions, dist, a_ips, h_ijp, shop_floors, sampleData):
     # Model
     model = Model("Allocation")
-    
-    
-    task_types_p = []
-    product_IDs = []
 
     #Motion Factors for station list
-    c_s = [s[5][0] for s in stations]
-    no_stations = [int(s[0][0]) for s in stations]
-    no_products = [int(p[0][0]) for p in products]
-    
+    c_s = [s.motion_factor for s in sampleData.stations]
+
     #Motion factors for products
-    c_p = [p[4][0] for p in products]
-    task_types_p_float = [p[2] for p in products]
- 
+    c_p = [p.motion_factor for p in sampleData.products]
+
+    no_stations = sampleData.get_station_ids()
+    no_products = sampleData.get_product_ids()
+    
     
     # Constructing handover parameters
     a = dict()
-    task_types = []
-    station_IDs = []
+    a_another = dict()
 
-    for p in range(len(no_products)):
-        c = [int(x) for x in task_types_p_float[p]]
-        task_types_p.append(c)
+    task_types_p = [p.tasks for p in sampleData.products]
     
     # Sorting handover parameters a[i,p,s]
     indices = a_ips[0]
     values = a_ips[1]
     
-    for i in range(len(indices)):
-        task_types.append(indices[i][0])
-        product_IDs.append(indices[i][1])
-        station_IDs.append(indices[i][2]) 
-        
-    for k in range(len(task_types)):
-        a[task_types[k],product_IDs[k],station_IDs[k]] = values[k]
+    for task_id in sampleData.get_task_ids():
+        for product_id in sampleData.get_product_ids():
+            for station_id in sampleData.get_station_ids():
+                if [task_id, product_id, station_id] in indices:
+                    a_another[task_id, product_id, station_id] = values[indices.index([task_id, product_id, station_id])]
+                else:
+                    a_another[task_id, product_id, station_id] = 0
     
     
     # Add decision variables
@@ -121,16 +114,14 @@ def solve(products, stations, positions, dist, a_ips, h_ijp, shop_floors, sample
     for p in no_products:
         for i in task_types_p[p-1]:
            for j in task_types_p[p-1]:
-#             if i == j-1 and h_ijp.get((i,j,p),0)==1:
-                  for r in shop_floors:
-#                      for v in range(r+1, len(shop_floors), 1):
-                         for f in positions:
-                             for g in positions:
-                                if g != f:
-                                    nge_list = get_next_greatest(shop_floors, r, y[i, p, f, r], y[j, p, g, v])
-                                    if nge_list[0] == True:
-                                        t = nge_list[1]
-                                        model.addConstr((y.get((i,p,f,r),0)+y.get((j,p,g,t),0))-1 <= z_p[p,f,r,g,t])
+                for r in shop_floors:
+                    for f in positions:
+                        for g in positions:
+                            if g != f:
+                                nge_list = get_next_greatest(shop_floors, r, y[i, p, f, r], y[j, p, g, v])
+                                if nge_list[0] == True:
+                                    t = nge_list[1]
+                                    model.addConstr((y.get((i,p,f,r),0)+y.get((j,p,g,t),0))-1 <= z_p[p,f,r,g,t])
                                 
     # Station movement between steps 
     for s in no_stations:                             
@@ -139,16 +130,14 @@ def solve(products, stations, positions, dist, a_ips, h_ijp, shop_floors, sample
                 if q!= p:
                     for i in task_types_p[p-1]:
                         for j in task_types_p[q-1]:
-#                            if a.get((i,p,s),0)==1 and a.get((q,j,s),0)==1:
-                                for r in shop_floors:
-#                                    for v in shop_floors:
-                                        for f in positions:
-                                            for g in positions:
-                                                if g!=f:
-                                                    nge_list = nge_fct(r,shop_floors,y[i,p,f,r],y[j,p,g,v])
-                                                    if nge_list[0] == True:
-                                                        t = nge_list[1]
-                                                        model.addConstr((y.get((i,p,f,r),0)+y.get((j,q,g,t),0))-1 <= z_s[s,f,r,g,t])
+                            for r in shop_floors:
+                                for f in positions:
+                                    for g in positions:
+                                        if g!=f:
+                                            nge_list = nge_fct(r,shop_floors,y[i,p,f,r],y[j,p,g,v])
+                                            if nge_list[0] == True:
+                                                t = nge_list[1]
+                                                model.addConstr((y.get((i,p,f,r),0)+y.get((j,q,g,t),0))-1 <= z_s[s,f,r,g,t])
     
     
     # Update the model to make constraints known.
