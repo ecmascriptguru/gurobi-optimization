@@ -1,11 +1,10 @@
 from gurobipy import *
+from nge_fct import nge_fct as get_next_greatest
 
-def solve(products, stations, positions, dist, a_ips, h_ijp, shop_floors):
+def solve(products, stations, positions, dist, a_ips, h_ijp, shop_floors, sampleData):
     # Model
     model = Model("Allocation")
     
-    # import relevant functions
-    import nge_fct
     
     task_types_p = []
     product_IDs = []
@@ -128,7 +127,7 @@ def solve(products, stations, positions, dist, a_ips, h_ijp, shop_floors):
                          for f in positions:
                              for g in positions:
                                 if g != f:
-                                    nge_list = nge_fct.nge_fct(shop_floors, r, y[i, p, f, r], y[j, p, g, v])
+                                    nge_list = get_next_greatest(shop_floors, r, y[i, p, f, r], y[j, p, g, v])
                                     if nge_list[0] == True:
                                         t = nge_list[1]
                                         model.addConstr((y.get((i,p,f,r),0)+y.get((j,p,g,t),0))-1 <= z_p[p,f,r,g,t])

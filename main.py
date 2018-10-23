@@ -4,6 +4,7 @@ import xlrd
 import numpy
 
 from settings import  ENV, PRODUCT_COUNT, STATION_COUNT, SHOPWIDTH, SHOPDEPTH, RESX, RESY
+from common import SampleData
 
 # Read data
 use_case_file_path = os.path.join(r'C:\Users\TimKo\Desktop\Uni_7.0\4_WZL\MA\Use_Case', 'use-case_kaiquan_stator-assy_1.xlsx')
@@ -62,7 +63,16 @@ for i in range(STATION_COUNT):
         station.append(station_property)
     
     stations.append(station)
+
+# Reading tasks
+sheet = usecase.sheet_by_name('Task_Type_Def')
+tasks = list()
+for row_index in range(sheet.nrows - 2):
+    row = sheet.row(row_index + 2)
+    tasks.append([int(row[3].value), int(row[2].value), row[1].value, row[5].value])
     
+data = SampleData(products, stations, tasks)
+
 
 # Step into assignment function
 import assignment
@@ -78,9 +88,8 @@ indices_string = a_ips[0]
 a_ips_values = []
 indices = []
 
-for number_string in indices_string:
-    number_string = [int(k) for k in number_string.split(",")]
-    indices.append(number_string)
+for number_string in a_ips[0]:
+    indices.append([int(k) for k in number_string.split(",")])
 
 for f in a_ips[1]:
     a_ips_values.append(int(f))
@@ -91,7 +100,7 @@ a_ips = [indices, a_ips_values]
 # Instantiate shop_floor
 from DistanceCalculation import DistanceCalculation
 
-shop_floor = DistanceCalculation(SHOPWIDTH,SHOPDEPTH,RESY,RESX)
+shop_floor = DistanceCalculation(SHOPWIDTH, SHOPDEPTH, RESY, RESX)
 
 # Instantiate positions
 zonesCount = RESY * RESX
@@ -108,20 +117,20 @@ for i in positions:
         dist[i,j] = shop_floor.GetDistance(i,j)
 
 # Create list of shop-floor instances r
-#shop_floors = [1,2,3,4,5,6]
-shop_floors = []        
-global_tasks = []
+shop_floors = [1,2,3,4,5,6,7,8,9,10,11]
+#shop_floors = []        
+#global_tasks = []
 
-tasks = [i[1] for i in products]
+#tasks = [i[1] for i in products]
 
-for k in range(len(tasks)):
-    for l in range(len(tasks[k])):
-        global_tasks.append(tasks[k][l])
+#for k in range(len(tasks)):
+#    for l in range(len(tasks[k])):
+#        global_tasks.append(tasks[k][l])
 
-instances = range(len(global_tasks))
+#instances = range(len(global_tasks))
 
-for i in instances:
-    shop_floors.append(i+1)
+#for i in instances:
+#    shop_floors.append(i+1)
    
 
 # Include precedence parameter h_ijp - intree precedence graph
@@ -247,11 +256,10 @@ h_p8[16,18,8] = 1
 
 # global intree dict
 h_ijp.update(h_p8)
-        
 
 # Step into allocation function
 import allocation
-allocation_params = allocation.solve(products,stations,positions,dist,a_ips,h_ijp,shop_floors)
+allocation_params = allocation.solve(products, stations, positions, dist, a_ips, h_ijp, shop_floors, data)
 
 
 
