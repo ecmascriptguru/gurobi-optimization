@@ -91,7 +91,9 @@ class SampleData(object):
         for item in tasks:
             task = Task(*item)
             self.tasks.append(task)
-        
+    
+    def get_tasks_from_IDs(self, ids):
+        return [self.tasks[id - 1] for id in ids]
 
     def get_product_ids(self):
         return [p.id for p in self.products]
@@ -101,3 +103,42 @@ class SampleData(object):
     
     def get_task_ids(self):
         return [t.id for t in self.tasks]
+
+    def get_d_is_p(self, task, station=None, product=None):
+        return task.processing_time
+
+    def get_v_p(self, p):
+        return self.products[p].velocity
+
+    def get_v_s(self, s):
+        return self.stations[s].velocity
+
+    def get_c_p(self, p):
+        return self.products[p].motion_factor
+
+    def get_c_s(self, s):
+        return self.stations[s].motion_factor
+
+    def get_D_p(self, p):
+        return self.products[p].due_date
+
+    def get_dist(self, f, g):
+        raise Exception("Not implemented")
+        pass
+
+    def get_S_i_p(self, task, product):
+        """Get subset of stations take can process task i of product p
+
+        Parameters
+        ---------------------
+        task : object
+            Task object, required
+        product : object
+            Product, required
+
+        Returns
+        ---------------------
+        list
+            a list of stations
+        """
+        return [s for s in self.stations if task.id in s.tasks]

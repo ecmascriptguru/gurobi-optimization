@@ -74,9 +74,12 @@ for row_index in range(sheet.nrows - 2):
 data = SampleData(products, stations, tasks)
 
 
+from assign import assign_products
+a_is_p = assign_products(data)
+
 # Step into assignment function
 import assignment
-a_ips = assignment.solve(products,stations)
+a_ips = assignment.solve(products, stations, data)
 
 
 
